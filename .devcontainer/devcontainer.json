@@ -1,0 +1,24 @@
+{
+	"name": "h132",
+	"image": "mcr.microsoft.com/devcontainers/go",
+	"features": {},
+	"postCreateCommand": ".devcontainer/postCreate.sh",
+	"runArgs": ["--init", "--privileged"],
+	"mounts": [],
+	"customizations": {
+		"vscode": {
+			"settings": {
+				"terminal.integrated.defaultProfile.linux": "zsh",
+				"terminal.integrated.profiles.linux": {
+					"zsh": {
+						"path": "/usr/bin/zsh",
+					},
+				},
+			},
+			"extensions": [
+				"golang.go",
+				"bufbuild.vscode-buf"
+			]
+		}
+	}
+}

@@ -1,0 +1,122 @@
+syntax = "proto3";
+package pb;
+
+option go_package = "./;pb";
+
+message P256PublicKey {
+  bytes x = 1;
+  bytes y = 2;
+}
+
+message P256PrivateKey {
+  bytes d = 1;
+}
+
+message EncryptedSymmetricKey {
+  // The public key of the recipient used to encrypt the symmetric key
+  P256PublicKey recipient_public_key = 1;
+
+  // The ephemeral public key of the sender used to encrypt the symmmetric key
+  P256PublicKey sender_ephemeral_public_key = 2;
+
+  // The signature of the ephemeral public key by the sender key
+  bytes sender_ephemeral_public_key_sign = 3;
+
+  // The symmetric key encrypted with the recipient's public key
+  bytes encrypted_symmetric_key = 4;
+
+  // The nonce used to encrypt the symmetric key
+  bytes nonce = 5;
+}
+
+message Letter {
+  bytes ciphertext = 1;
+  bytes nonce = 2;
+  repeated EncryptedSymmetricKey recipient_keys = 3;
+  P256PublicKey sender_public_key = 4;
+}
+
+message Envelope {
+  bytes letter_proto = 1;
+  bytes signature = 2;
+}
+
+// The emergency backup key, used to recover envelopes in case of a TPM failure.
+// The private key is encoded as a bip39 mneumonic, written down on a piece of
+// paper, and stored in a safe.
+message EmergencyBackupKey {
+  // Hint about the physical location of the key mneumonic written down.
+  string hint = 1;
+}
+
+// A TPM key, with a passphrase derived from WebAuthn PRF.
+message WebAuthnWrappedTPMKey {
+  // The URL used to trigger WebAuthn interaction.
+  string reflector_url = 1;
+
+  // The key handle used to identify the key in the TPM.
+  uint32 tpm_key_handle = 2;
+
+  // The salt given to retrieve PRF output from WebAuthn. Must be 32 bytes.
+  bytes prf_salt = 3;
+
+  // The salt given to HKDF to derive the TPM passphrase from the PRF output.
+  bytes hkdf_salt = 4;
+
+  // The username used to derive the WebAuthn credential {id, name, displayName}.
+  string webauthn_username = 5;
+
+  // The credential JSON returned by WebAuthn.
+  bytes webauthn_credential_json = 6;
+}
+
+message KeyImpl {
+  // The name of the key, specified by the user when starting a h132 session.
+  string name = 1;
+
+  P256PublicKey public_key = 2;
+
+  oneof impl {
+    // Private key presented in the clear. Only used for debugging.
+    // h132 refuses to operate unless the debug flag is set.
+    P256PrivateKey debug_raw_key = 10;
+
+    EmergencyBackupKey emergency_backup_key = 11;
+
+    WebAuthnWrappedTPMKey webauthn_wrapped_tpm = 12;
+  }
+}
+
+// LetterWritingSet is a h132 configuration that is stored as
+// "h132_letter_writing_set.binpb" file in the directory with the envelopes.
+message LetterWritingSet {
+  // The name of the letter writing set - presented to the user when operating
+  // under the letter writing set.
+  string name = 1;
+
+  // The keys that can decrypt the envelopes.
+  repeated KeyImpl keys = 2;
+}
+
+/*
+   message TPMTransientKey {
+     bytes tpm_context = 1;
+   }
+
+   message TPMPermanentKey {
+     uint32 tpm_key_handle = 1;
+     bytes passphrase = 2;
+   }
+
+   message SavedSession {
+     uint64 created_at_unixtime = 1;
+
+     string letter_writing_set_name = 2;
+
+     oneof private_key {
+       P256PrivateKey debug_raw_key = 10;
+       TPMTransientKey tpm_transient_key = 11;
+       TPMPermanentKey tpm_permanent_key = 12;
+     }
+   }
+*/

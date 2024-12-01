@@ -1,0 +1,6 @@
+var/
+# Ignore Linux core dump files
+core
+core.*
+
+dist/

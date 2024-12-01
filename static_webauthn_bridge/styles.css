@@ -1,0 +1,137 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(135deg,
+        #a9a9a9 0%,
+        #d9d9d9 79.7%,
+        #ffa500 79.8%,
+        #ffa500 80.2%,
+        #222222 80.3%,
+        #444444 100%);
+    color: #222;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.container {
+    width: 100%;
+    max-width: 600px;
+    padding: 30px;
+    background-color: #f0f0f0;
+    border: 1px solid #999;
+    border-radius: 4px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+    background-image: linear-gradient(135deg, #e8e8e8, #e0e0e0);
+}
+
+header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+h1 {
+    font-size: 2rem;
+    margin-bottom: 10px;
+    color: #222;
+}
+
+#details {
+    margin-bottom: 20px;
+}
+
+#details p {
+    margin-bottom: 10px;
+    color: #444;
+}
+
+strong {
+    color: #222;
+}
+
+button {
+    background: linear-gradient(180deg, #28a745, #2a9146); /* Subtle vertical gradient */
+    color: #fff;
+    width: 100%; /* Full width button */
+    padding: 10px 25px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    display: flex;
+    justify-content: center; /* Center the text within the button */
+    align-items: center;
+    position: relative; /* Positioning for the lock icon and separator */
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+button:hover {
+    background: linear-gradient(180deg, #238c3f, #218838); /* Slightly darker vertical gradient on hover */
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+button .icon-container {
+    width: 40px; /* Fixed width to create a square area */
+    height: 40px; /* Equal height to make it square */
+    display: flex;
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+    position: absolute;
+    left: 0;
+    background-color: rgba(0, 0, 0, 0.1); /* Optional subtle background for the icon region */
+}
+
+button .icon-container::after {
+    content: ""; /* Separator line */
+    position: absolute;
+    right: -1px; /* Align to the right edge of the icon */
+    width: 1px;
+    height: 100%;
+    background-color: #fff; /* Separator color */
+}
+
+button span {
+    margin-left: 40px; /* Offset text to account for the icon area */
+}
+
+textarea {
+    width: 100%;
+    height: 250px;
+    background-color: #e7e7e7;
+    color: #222;
+    border: 1px solid #999;
+    padding: 10px;
+    margin: 0 0 5px;
+    resize: none;
+    font-family: monospace;
+    font-size: 0.7em;
+}
+
+textarea[readonly] {
+    opacity: 0.95;
+}
+
+.hidden {
+    display: none;
+}
+
+#errorMessage {
+    color: #ff4d4d;
+    margin-top: 10px;
+}
+
+/* Accent colors for highlights */
+#letter_writing_set {
+    color: #555;
+}
+
+#key_name {
+    color: #222;
+}

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<head>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1 id="header">h132 Registration</h1>
+    </header>
+
+    <section id="details">
+        <p>You are about to register your security key for the following:</p>
+        <p><strong>Letter Writing Store:</strong> <span id="lws_name"></span></p>
+        <p><strong>Key Name:</strong> <span id="key_name"></span></p>
+    </section>
+
+    <section id="results">
+        <textarea id="resultTextArea" readonly class="hidden">asdffdsa</textarea>
+        <p id="errorMessage" class="hidden"></p>
+    </section>
+
+    <section id="actions">
+        <button id="register" class="hidden">
+            <div class="icon-container">🔐</div>
+            <span id="actionLabel">Register</span>
+        </button>
+        <button id="login" class="hidden">
+            <div class="icon-container">🔐</div>
+            <span id="actionLabel">Login</span>
+        </button>
+        <button id="copy" class="hidden">
+            <div class="icon-container">📋</div>
+            <span id="actionLabel">Copy to Clipboard</span>
+        </button>
+    </section>
+</div>
+<script>
+const $ = document.querySelector.bind(document);
+
+function displayError(e) {
+    $('#errorMessage').textContent = e;
+    $('#details').classList.add('hidden');
+    $('#actions').classList.add('hidden');
+    $('#errorMessage').classList.remove('hidden');
+}
+
+// Parse a base64url-encoded gziped JSON object
+async function parseZB64(encoded) {
+    try {
+        const b64 = encoded.replace(/-/g, '+').replace(/_/g, '/');
+        const bytes = new Uint8Array([...atob(b64)].map(c => c.charCodeAt(0)));
+
+        const dstream = new Response(bytes).body.
+            pipeThrough(new DecompressionStream('gzip'));
+        const optstext = await new Response(dstream).text();
+        return JSON.parse(optstext);
+    } catch (e) {
+        throw new Error('Failed to parse zb64 - Please check if the URL is correct.');
+    }
+}
+
+// Encrypt a byte array with AES-GCM derived using the JWK-encoded ECDH public key `ecdhKey`.
+async function encrypt(ecdhKey, bs) {
+    const myKey = await window.crypto.subtle.generateKey(
+        {name: "ECDH", namedCurve: "P-256"},
+        /* extractable=*/ false,
+        ["deriveBits"]);
+    const theirKey = await crypto.subtle.importKey(
+        'jwk', ecdhKey, {name: 'ECDH', namedCurve: 'P-256'},
+        /* extractable=*/false, []);
+    const ss = await crypto.subtle.deriveBits(
+        {name: 'ECDH', public: theirKey}, myKey.privateKey,
+        256);
+    const sskey = await crypto.subtle.importKey(
+        'raw', ss, {name: 'HKDF'}, /* extractable=*/false, ['deriveKey']);
+    const cek = await crypto.subtle.deriveKey(
+        {
+            name: 'HKDF',
+            hash: 'SHA-256',
+            salt: new TextEncoder().encode("h132_login"),
+            info: new Uint8Array()
+        },
+        sskey, {name: 'AES-GCM', length: 256}, /* extractable=*/false, ['encrypt']);
+
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const ivB64 = btoa(String.fromCharCode(...iv));
+    const encryptedBs = await crypto.subtle.encrypt(
+        {name: 'AES-GCM', iv: iv},
+        cek, bs);
+    const encryptedB64 = btoa(String.fromCharCode(...new Uint8Array(encryptedBs)));
+
+    return {
+        nonceB64: ivB64,
+        encryptedB64: encryptedB64,
+        pubJwk: await crypto.subtle.exportKey('jwk', myKey.publicKey)
+    };
+}
+
+// Encode a JSON object to base64-encoded gzip
+async function encodeZB64(obj) {
+    const jsontext = JSON.stringify(obj);
+    const optstream = new Response(jsontext).body.
+        pipeThrough(new CompressionStream('gzip'));
+    const optbytes = await new Response(optstream).arrayBuffer();
+    return btoa(String.fromCharCode(...new Uint8Array(optbytes)));
+}
+
+$('#copy').addEventListener('click', () => {
+    $("#resultTextArea").select();
+    document.execCommand('copy');
+});
+
+document.addEventListener('DOMContentLoaded', async () => {
+    const hash = new URL(document.location.toString()).hash;
+    const optsjson = await parseZB64(hash.slice(1));
+
+    if (optsjson['action'] == 'registration') {
+        const opts = await (async () => {
+            try {
+                const opts = PublicKeyCredential.parseCreationOptionsFromJSON(optsjson.creation.publicKey);
+
+                const name = opts.user.displayName;
+                const [keyName, lwsName] = name.split("@");
+
+                $('#lws_name').textContent = lwsName;
+                $('#key_name').textContent = keyName;
+                $('#register').classList.remove('hidden');
+
+                return opts;
+            } catch (e) {
+                displayError(e);
+            }
+        })();
+
+        $('#register').addEventListener('click', async () => { try {
+            const cred = await navigator.credentials.create({ publicKey: opts });
+            const credb64 = await encodeZB64(cred.toJSON());
+
+            $('#resultTextArea').textContent = credb64;
+            $('#resultTextArea').classList.remove('hidden');
+            $('#register').classList.add('hidden');
+            $('#copy').classList.remove('hidden');
+        } catch (e) {
+            displayError(e);
+        }});
+    } else if (optsjson['action'] == 'login') {
+        $('#header').textContent = 'h132 Login';
+
+        const opts = await (async () => {
+            try {
+                const opts = PublicKeyCredential.parseRequestOptionsFromJSON(optsjson.assertion.publicKey);
+
+                const name = optsjson["userName"];
+                const [keyName, lwsName] = name.split("@");
+
+                $('#lws_name').textContent = lwsName;
+                $('#key_name').textContent = keyName;
+                $('#login').classList.remove('hidden');
+
+                return opts;
+            } catch (e) {
+                displayError(e);
+            }
+        })();
+
+        $('#login').addEventListener('click', async () => { try {
+            const cred = await navigator.credentials.get({ publicKey: opts });
+            console.dir(cred.toJSON());
+            const credjson = cred.toJSON();
+
+            const extResults = cred.getClientExtensionResults();
+            const first = extResults?.prf?.results?.first;
+            if (!first) {
+                throw new Error('Failed to get prf result');
+            }
+            const firstb64 = btoa(String.fromCharCode(...new Uint8Array(first)));
+            credjson.clientExtensionResults = {
+                prf: { results: { first: firstb64 } }
+            };
+
+            const jsontext = JSON.stringify(credjson);
+            const gzstream = new Response(jsontext).body.
+                pipeThrough(new CompressionStream('gzip'));
+            const gzbs = await new Response(gzstream).arrayBuffer();
+            const enc = await encrypt(optsjson["ecdhKey"], gzbs);
+            const encjsontext = JSON.stringify(enc);
+            const encbs = new TextEncoder().encode(encjsontext);
+            const b64 = btoa(String.fromCharCode(...new Uint8Array(encbs)));
+
+            $('#resultTextArea').textContent = b64;
+            $('#resultTextArea').classList.remove('hidden');
+            $('#login').classList.add('hidden');
+            $('#copy').classList.remove('hidden');
+        } catch (e) {
+            displayError(e);
+        }});
+    } else {
+        displayError('Neither registration nor login parameter is provided');
+    }
+});
+</script>
