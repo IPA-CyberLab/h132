@@ -12,6 +12,10 @@ import (
 )
 
 func TPMForTesting() transport.TPMCloser {
+	if os.Getenv("SKIP_TPM_TESTS") != "" {
+		return nil
+	}
+
 	tempdir, err := os.MkdirTemp("", "swtpm_test")
 	if err != nil {
 		panic(err)
@@ -31,22 +35,15 @@ func TPMForTesting() transport.TPMCloser {
 	}
 
 	return swtpm
-
-	/*
-	   tpm, err := transport.OpenTPM("/dev/tpmrm0")
-
-	   	if err != nil {
-	   		panic(err)
-	   	}
-
-	   return tpm
-	*/
 }
 
 const TestKeyHandle = 0x81008231
 
 func TestBackedP256Key(t *testing.T) {
 	tpm := TPMForTesting()
+	if tpm == nil {
+		t.Skip("TPM tests are disabled")
+	}
 	defer tpm.Close()
 
 	cfg := BackedP256KeyConfig{
