@@ -71,7 +71,7 @@ Next, generate a configuration file for the repository. This file stores the `h1
 Run the following commands to create a new letter writing set:
 
 ```sh
-$ export LWS_DIR=/path/to/your/repo
+$ export H132_LWS_DIR=/path/to/your/repo
 $ h132 lws create --name your_lws_name
 info    Letter writing set (name=your_lws_name) successfully created!
 ```
@@ -79,7 +79,7 @@ info    Letter writing set (name=your_lws_name) successfully created!
 - Replace `/path/to/your/repo` with the path to your secret repository where you want to store your letter writing set.
 - Replace `your_lws_name` with a name of your choice for the letter writing set.
 
-**Note:** Setting the `LWS_DIR` environment variable defines the location where `h132` will store its configuration files for the letter writing set.
+**Note:** Setting the `H132_LWS_DIR` environment variable defines the location where `h132` will store its configuration files for the letter writing set.
 
 ### 🔑 Adding Access Keys
 
@@ -153,7 +153,7 @@ info    Produced an envelope file "/path/to/your_secret_file.h132"
 
 - Replace `your_key_name` with the name of the access key you added earlier.
 - Replace `/path/to/your_secret_file` with the path to the file you want to encrypt.
-- The encrypted file will be saved with a `.h132` extension in `LWS_DIR` directory.
+- The encrypted file will be saved with a `.h132` extension in `H132_LWS_DIR` directory.
 
 ### 📤 Decrypting a File
 
@@ -169,7 +169,7 @@ info    Produced a plaintext file "/path/to/your_secret_file"
 ```
 
 - Replace `/path/to/your_secret_file.h132` with the path to the encrypted file.
-- The decrypted file will be restored without the `.h132` extension in `LWS_DIR` directory.
+- The decrypted file will be restored without the `.h132` extension in `H132_LWS_DIR` directory.
 
 ---
 

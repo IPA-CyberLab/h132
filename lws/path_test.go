@@ -15,9 +15,9 @@ func TestCheckWriteAccess(t *testing.T) {
 	}
 	defer os.RemoveAll(tempDir)
 
-	// Set the LWS_DIR environment variable to the temporary directory
-	os.Setenv("LWS_DIR", tempDir)
-	defer os.Unsetenv("LWS_DIR")
+	// Set the H132_LWS_DIR environment variable to the temporary directory
+	os.Setenv("H132_LWS_DIR", tempDir)
+	defer os.Unsetenv("H132_LWS_DIR")
 
 	// Test case where write access is available
 	err = lws.CheckWriteAccess()
@@ -43,8 +43,8 @@ func TestCheckWriteAccess(t *testing.T) {
 }
 
 func TestGetEnvelopePath(t *testing.T) {
-	os.Setenv("LWS_DIR", "/foo/bar/lws")
-	defer os.Unsetenv("LWS_DIR")
+	os.Setenv("H132_LWS_DIR", "/foo/bar/lws")
+	defer os.Unsetenv("H132_LWS_DIR")
 
 	tcs := []struct {
 		plaintextPath  string

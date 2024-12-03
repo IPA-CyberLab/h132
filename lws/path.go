@@ -12,7 +12,7 @@ import (
 const ENVELOPE_FILEEXT = ".h132"
 
 func GetLWSDir() string {
-	d := os.Getenv("LWS_DIR")
+	d := os.Getenv("H132_LWS_DIR")
 	if d == "" {
 		var err error
 		d, err = os.Getwd()
