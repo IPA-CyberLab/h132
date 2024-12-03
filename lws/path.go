@@ -26,6 +26,15 @@ func GetLWSDir() string {
 	return d
 }
 
+func GetPlaintextDir() string {
+	d := os.Getenv("H132_PLAINTEXT_DIR")
+	if d == "" {
+		return GetLWSDir()
+	}
+
+	return d
+}
+
 // CheckWriteAccess checks if the user has write access to the LWS directory.
 func CheckWriteAccess() error {
 	d := GetLWSDir()
@@ -54,9 +63,10 @@ func GetEnvelopePath(plaintextPath string) string {
 }
 
 func GetPlaintextPath(envelopePath string) string {
-	if strings.HasSuffix(envelopePath, ENVELOPE_FILEEXT) {
-		return envelopePath[:len(envelopePath)-len(ENVELOPE_FILEEXT)]
+	fname := path.Base(envelopePath)
+	if strings.HasSuffix(fname, ENVELOPE_FILEEXT) {
+		return path.Join(GetPlaintextDir(), fname[:len(fname)-len(ENVELOPE_FILEEXT)])
 	} else {
-		return envelopePath + ".plaintext"
+		return path.Join(GetPlaintextDir(), fname+".plaintext")
 	}
 }

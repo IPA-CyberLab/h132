@@ -68,7 +68,10 @@ func TestGetEnvelopePath(t *testing.T) {
 }
 
 func TestGetPlaintextPath(t *testing.T) {
-	t.Parallel()
+	os.Setenv("H132_LWS_DIR", "/foo/bar/lws")
+	os.Setenv("H132_PLAINTEXT_DIR", "/foo/bar/plaintext")
+	defer os.Unsetenv("H132_LWS_DIR")
+	defer os.Unsetenv("H132_PLAINTEXT_DIR")
 
 	tcs := []struct {
 		envelopePath   string
@@ -76,11 +79,11 @@ func TestGetPlaintextPath(t *testing.T) {
 	}{
 		{
 			envelopePath:   "/tmp/letter.h132",
-			expectedResult: "/tmp/letter",
+			expectedResult: "/foo/bar/plaintext/letter",
 		},
 		{
 			envelopePath:   "/tmp/letter",
-			expectedResult: "/tmp/letter.plaintext",
+			expectedResult: "/foo/bar/plaintext/letter.plaintext",
 		},
 	}
 	for _, tc := range tcs {
