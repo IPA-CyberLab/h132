@@ -117,6 +117,10 @@ func SetProperty(lws *pb.LetterWritingSet, propertyName, value string) error {
 	switch propertyName {
 	case "name":
 		lws.Name = value
+	case "pre_edit_hook":
+		lws.PreEditHook = value
+	case "post_edit_hook":
+		lws.PostEditHook = value
 	default:
 		return fmt.Errorf("unknown property name: %q", propertyName)
 	}
@@ -128,5 +132,7 @@ func DumpStatus(lws *pb.LetterWritingSet) error {
 
 	s.Infof("Letter Writing Set: %s", lws.Name)
 	s.Infof("Number of Keys: %d", len(lws.Keys))
+	s.Infof("Pre-Edit Hook: %q", lws.PreEditHook)
+	s.Infof("Post-Edit Hook: %q", lws.PostEditHook)
 	return nil
 }

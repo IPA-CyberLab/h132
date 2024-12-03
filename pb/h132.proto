@@ -98,10 +98,10 @@ message LetterWritingSet {
   repeated KeyImpl keys = 2;
 
   // Shell command before editing a envelope. The envelope path is passed as an argument.
-  string edit_precondition_shell_command = 10;
+  string pre_edit_hook = 10;
 
   // Shell command after new envelope is created or edited. The envelope path is passed as an argument.
-  string edit_postcondition_shell_command = 11;
+  string post_edit_hook = 11;
 }
 
 /*
