@@ -57,6 +57,33 @@ This project is highly experimental. Before considering its use, it is *strongly
 
 *To be written.*
 
+## 🧑‍💻 Setting Up the Development Environment
+
+For your convenience, devcontainer configuration files are provided. It is recommended to use them to set up your development environment.
+
+### Using Dev Containers
+
+To open the Project in a Dev Container:
+- Open the `h132` project folder in VS Code.
+- You should see a prompt asking to reopen the folder in a dev container. Click "Reopen in Container".
+   - This will require "Remote Development" extension pack.
+- VS Code will build and start the dev container defined by the provided configuration files.
+
+### Using the TPM Emulator for Development
+
+For development purposes, you can use the `swtpm` TPM emulator:
+
+1. **Start the TPM Emulator:**
+   - Run the script `hack/start_swtpm.sh` to start the TPM emulator.
+2. **Set the TPM Path Environment Variable:**
+   - Set the environment variable `H132_TPM_PATH` to point to the emulator socket:
+     ```bash
+     export H132_TPM_PATH=/workspaces/h132/var/swtpm_dir/server.sock
+     ```
+   - This tells the `h132` command to use the emulated TPM instead of a real device.
+
+*Note:* While using a TPM emulator is acceptable for development, it defeats the purpose of the system for production use. Always use a real TPM 2.0 module in production environments.
+
 ## 📄 License
 [Apache License 2.0](./LICENSE)
 
