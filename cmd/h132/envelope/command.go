@@ -13,6 +13,7 @@ var Command = &cli.Command{
 	Aliases: []string{"e"},
 	Usage:   "Manage envelopes",
 	Subcommands: []*cli.Command{
+		editCommand,
 		sealCommand,
 		unsealCommand,
 		dumpCommand,

@@ -35,10 +35,17 @@ func GetPlaintextDir() string {
 	return d
 }
 
-// CheckWriteAccess checks if the user has write access to the LWS directory.
-func CheckWriteAccess() error {
-	d := GetLWSDir()
-	checkfn := path.Join(d, ".h132_write_access_check")
+// CheckWriteAccess checks if the user has write access to the specified directory.
+func CheckWriteAccess(dir string) error {
+	fi, err := os.Stat(dir)
+	if err != nil {
+		return fmt.Errorf("access check failed - failed to stat directory %q: %w", dir, err)
+	}
+	if !fi.IsDir() {
+		return fmt.Errorf("access check failed - %q is not a directory", dir)
+	}
+
+	checkfn := path.Join(dir, ".h132_write_access_check")
 
 	f, err := os.OpenFile(checkfn, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0600)
 	if err != nil {

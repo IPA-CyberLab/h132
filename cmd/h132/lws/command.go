@@ -44,7 +44,7 @@ var createCommand = &cli.Command{
 		} else if !errors.Is(err, os.ErrNotExist) {
 			return err
 		}
-		if err := lws.CheckWriteAccess(); err != nil {
+		if err := lws.CheckWriteAccess(lws.GetLWSDir()); err != nil {
 			return err
 		}
 

@@ -9,10 +9,10 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-var sealCommand = &cli.Command{
-	Name:    "seal",
-	Aliases: []string{"s"},
-	Usage:   "Encrypt and sign a plaintext file content into a h132 envelope file",
+var editCommand = &cli.Command{
+	Name:    "edit",
+	Aliases: []string{"e"},
+	Usage:   "Edit h132 envelope file content",
 	Flags: []cli.Flag{
 		&cli.StringFlag{
 			Name:     "key",
@@ -31,8 +31,8 @@ var sealCommand = &cli.Command{
 
 		// FIXME[P2]: Run presubmit-like script to check if the latest change to the file is checked-in to git
 
-		fileName := c.Args().First()
-		if fileName == "" {
+		envelopeFilePath := c.Args().First()
+		if envelopeFilePath == "" {
 			return common.ErrInvalidInput{Msg: "file name is required"}
 		}
 		if c.Args().Len() > 1 {
@@ -44,7 +44,7 @@ var sealCommand = &cli.Command{
 			return common.ErrInvalidInput{Msg: "max-file-size must be greater than 0"}
 		}
 
-		contents, err := ReadFileCapped(fileName, maxFileSize)
+		envelopeBs, err := ReadFileCapped(envelopeFilePath, maxFileSize)
 		if err != nil {
 			return err
 		}
@@ -54,6 +54,9 @@ var sealCommand = &cli.Command{
 			return err
 		}
 		if err := lws.CheckWriteAccess(lws.GetLWSDir()); err != nil {
+			return err
+		}
+		if err := lws.CheckWriteAccess(lws.GetPlaintextDir()); err != nil {
 			return err
 		}
 
@@ -68,7 +71,7 @@ var sealCommand = &cli.Command{
 			return err
 		}
 
-		if err := lws.Seal(l, ak, fileName, contents); err != nil {
+		if err := lws.Edit(l, ak, envelopeFilePath, envelopeBs); err != nil {
 			return err
 		}
 

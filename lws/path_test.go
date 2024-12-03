@@ -15,12 +15,8 @@ func TestCheckWriteAccess(t *testing.T) {
 	}
 	defer os.RemoveAll(tempDir)
 
-	// Set the H132_LWS_DIR environment variable to the temporary directory
-	os.Setenv("H132_LWS_DIR", tempDir)
-	defer os.Unsetenv("H132_LWS_DIR")
-
 	// Test case where write access is available
-	err = lws.CheckWriteAccess()
+	err = lws.CheckWriteAccess(tempDir)
 	if err != nil {
 		t.Errorf("expected no error, got %v", err)
 	}
@@ -31,7 +27,7 @@ func TestCheckWriteAccess(t *testing.T) {
 		t.Fatalf("failed to change directory permissions: %v", err)
 	}
 
-	err = lws.CheckWriteAccess()
+	err = lws.CheckWriteAccess(tempDir)
 	if err == nil {
 		t.Errorf("expected error, got nil")
 	}

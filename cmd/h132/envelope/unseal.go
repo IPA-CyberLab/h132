@@ -44,7 +44,7 @@ var unsealCommand = &cli.Command{
 			return err
 		}
 		// Note: we output the decrypted file to the LWS dir, so we need write access
-		if err := lws.CheckWriteAccess(); err != nil {
+		if err := lws.CheckWriteAccess(lws.GetLWSDir()); err != nil {
 			return err
 		}
 
