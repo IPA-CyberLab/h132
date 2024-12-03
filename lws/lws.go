@@ -112,3 +112,11 @@ func GetKeyByPublicKey(lws *pb.LetterWritingSet, needle *ecdsa.PublicKey) *pb.Ke
 	}
 	return nil
 }
+
+func DumpStatus(lws *pb.LetterWritingSet) error {
+	s := zap.S()
+
+	s.Infof("Letter Writing Set: %s", lws.Name)
+	s.Infof("Number of Keys: %d", len(lws.Keys))
+	return nil
+}

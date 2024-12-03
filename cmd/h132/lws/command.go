@@ -10,5 +10,6 @@ var Command = &cli.Command{
 	Usage:   "Manage letter writing set",
 	Subcommands: []*cli.Command{
 		createCommand,
+		statusCommand,
 	},
 }

@@ -5,10 +5,11 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/IPA-CyberLab/h132/lws"
-	"github.com/IPA-CyberLab/h132/pb"
 	"github.com/urfave/cli/v2"
 	"go.uber.org/zap"
+
+	"github.com/IPA-CyberLab/h132/lws"
+	"github.com/IPA-CyberLab/h132/pb"
 )
 
 var createCommand = &cli.Command{

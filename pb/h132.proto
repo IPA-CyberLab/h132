@@ -96,6 +96,12 @@ message LetterWritingSet {
 
   // The keys that can decrypt the envelopes.
   repeated KeyImpl keys = 2;
+
+  // Shell command before editing a envelope. The envelope path is passed as an argument.
+  string edit_precondition_shell_command = 10;
+
+  // Shell command after new envelope is created or edited. The envelope path is passed as an argument.
+  string edit_postcondition_shell_command = 11;
 }
 
 /*
