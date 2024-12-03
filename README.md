@@ -1,14 +1,17 @@
 # h132: Experimental Secret Information Management System
-
-[![Build Status][gh-actions-badge]][gh-actions]
-[![go report][go-report-badge]][go-report]
+<p align='center'>
+<img src="https://github.com/IPA-CyberLab/h132/blob/master/website/logo.png?raw=true" />
+</p>
 
 **h132** is an experimental secret information management system written in Go.
 It leverages affordable, tamper-resistant hardware modules such as **TPM 2.0** and **FIDO2 Security Keys** to provide a cost-effective alternative to traditional Hardware Security Modules (HSMs).
 
 The name "h132" is derived from the Japanese word for "secret" (**秘密 - himitsu**) 😉
 
-## ⚠⚠⚠️ Important Notice ⚠⚠⚠
+[![Build Status][gh-actions-badge]][gh-actions]
+[![go report][go-report-badge]][go-report]
+
+## ⚠️🚧⚠️ Important Notice ⚠️️🚧⚠️ ️
 
 This project is highly experimental. Before considering its use, it is *strongly recommended* to explore established tools like [GnuPG](https://gnupg.org/) and [age](https://age-encryption.org/). While these tools do not support the proposed multi-factor encryption scheme, they are arguably much safer than relying on experimental software.
 
@@ -53,9 +56,121 @@ This project is highly experimental. Before considering its use, it is *strongly
     - The [Yubico Security Key](https://www.yubico.com/products/security-key/) is available for under 7,000 JPY.
     - Be careful when purchasing a Security Key. Not all FIDO2 keys support the `hmac-secret` extension.
 
-## 🚀 Getting Started
+## 📘 Usage Guide for h132
 
-*To be written.*
+This document provides a step-by-step guide on how to use **h132**, an experimental secret information management system. Follow the instructions below to securely manage your secret files.
+
+### 📁 Setting Up a Secret Repository
+
+First, set up a Source Control Management (SCM) repository (like Git) to store your secret files. Although all files managed by the SCM are stored encrypted, the repository activity is not encrypted. Therefore, it is recommended to set up a **private repository**.
+
+### 📝 Generating a Configuration File
+
+Next, generate a configuration file for the repository. This file stores the `h132` configuration that applies to all file operations within the repository. The repository-wide configuration is called a **letter writing set**.
+
+Run the following command to create a new letter writing set:
+
+```sh
+$ export LWS_DIR=/path/to/your/repo
+$ h132 lws create --name your_lws_name
+info    Letter writing set (name=your_lws_name) successfully created!
+```
+
+- Replace `/path/to/your/repo` with the secret repository checkout path where you want to store your letter writing set.
+- Replace `your_lws_name` with a name of your choice for the letter writing set.
+
+### 🔑 Adding Access Keys
+
+#### Adding a TPM 2.0 Managed Access Key
+
+To add an access key managed by TPM 2.0 and protected by a FIDO2 Security Key, use the following command:
+
+```sh
+$ h132 keys add --type webauthn_wrapped_tpm --name your_key_name --tpmKeyHandle 81008015
+info    Using TPM device: /dev/tpm0
+Please navigate to the following URL in your browser: https://ipa-cyberlab.github.io/h132/webauthn_bridge/#...
+
+info    Successfully registered WebAuthn credential. Now acquiring PRF secret.
+Please navigate to the following URL in your browser: https://ipa-cyberlab.github.io/h132/webauthn_bridge/#...
+
+info    Successfully acquired PRF. Now provisioning the key on the TPM.
+info    Successfully generated key: [key details] {Name: your_key_name, Type: WebauthnWrappedTpm, TpmKeyHandle: 0x81008015, ReflectorUrl: https://ipa-cyberlab.github.io/h132/webauthn_bridge/}
+info    Updated letter writing set: key "your_key_name" added.
+info    Successfully added the key to the letter writing set.
+```
+
+- Replace `your_key_name` with a name for your access key.
+- The `--tpmKeyHandle` option specifies the TPM handle where the key will be stored. We recommend using `810080xx`.
+    - Please consult Section 2.3.1 of ["Registry of Reserved TPM2.0 Handles and Localities"](https://trustedcomputinggroup.org/wp-content/uploads/RegistryOfReservedTPM2HandlesAndLocalities_v1p1_pub.pdf) for precise ranges.
+    - `h132` will bail out safely if there's a pre-existing key at the specified handle, so feel free to try and error.
+- Specify the path to your TPM device using `H132_TPM_PATH` environment variable. `h132` will use `"/dev/tpmrm0` by [default](https://github.com/IPA-CyberLab/h132/blob/master/tpm2/device.go#L13).
+
+#### Adding an Emergency Access Key
+
+To add an emergency access key (a backup method to access your secrets), run:
+
+```sh
+$ h132 keys add --type emergency --hint your_hint --name emergency
+Mnemonic accepted:
+[Your mnemonic phrase will be displayed here]
+
+info    Successfully generated key: [key details] {Name: emergency, Type: EmergencyBackupKey, Hint: your_hint}
+info    Updated letter writing set: key "emergency" added.
+info    Successfully added the key to the letter writing set.
+```
+
+- Replace `your_hint` with a hint for where you will store your mnemonic phrase (e.g., "safety deposit box").
+- The mnemonic phrase displayed is your recovery phrase. **Store it securely**.
+
+### 📜 Listing Registered Keys
+
+To list the keys registered in your letter writing set, use:
+
+```sh
+$ h132 keys ls
+info    Found 2 keys in the letter writing set "your_lws_name"
+[0] [key details] {Name: emergency, Type: EmergencyBackupKey, Hint: your_hint}
+[1] [key details] {Name: your_key_name, Type: WebauthnWrappedTpm, TpmKeyHandle: 0x81008015, ReflectorUrl: https://ipa-cyberlab.github.io/h132/webauthn_bridge/}
+```
+
+### 📥 Importing a Sensitive File
+
+To import (encrypt) a sensitive file into your repository, run:
+
+```sh
+$ h132 envelope seal --key your_key_name path/to/your_secret_file
+info    Using TPM device: /dev/tpm0
+Please navigate to the following URL in your browser: https://ipa-cyberlab.github.io/h132/webauthn_bridge/#...
+
+info    Successfully sealed h132 envelope "path/to/your_secret_file.h132"
+info    Produced an envelope file "path/to/your_secret_file.h132"
+```
+
+- Replace `your_key_name` with the name of the access key you added earlier.
+- Replace `path/to/your_secret_file` with the path to the file you want to encrypt.
+- The encrypted file will be saved with a `.h132` extension.
+
+### 📤 Decrypting a File
+
+To decrypt the file when you need to access its contents, use:
+
+```sh
+$ h132 envelope unseal --key your_key_name path/to/your_secret_file.h132
+info    Using TPM device: /dev/tpm0
+Please navigate to the following URL in your browser: https://ipa-cyberlab.github.io/h132/webauthn_bridge/#...
+
+info    Successfully unsealed h132 envelope "path/to/your_secret_file.h132"
+info    Produced a plaintext file "path/to/your_secret_file"
+```
+
+- Replace `path/to/your_secret_file.h132` with the path to the encrypted file.
+- The decrypted file will be restored without the `.h132` extension.
+
+---
+
+**Note:** Throughout the process, you will be prompted to navigate to a URL in your browser. This is part of the WebAuthn authentication process using your FIDO2 Security Key. Follow the instructions in your browser to complete the authentication.
+
+Remember to keep your TPM device, FIDO2 Security Key, and mnemonic phrase secure at all times to maintain the integrity of your secret management system.
 
 ## 🧑‍💻 Setting Up the Development Environment
 
