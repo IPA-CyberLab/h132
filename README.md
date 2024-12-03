@@ -68,7 +68,7 @@ First, set up a Source Control Management (SCM) repository (like Git) to store y
 
 Next, generate a configuration file for the repository. This file stores the `h132` configuration that applies to all file operations within the repository. The repository-wide configuration is called a **letter writing set**.
 
-Run the following command to create a new letter writing set:
+Run the following commands to create a new letter writing set:
 
 ```sh
 $ export LWS_DIR=/path/to/your/repo
@@ -76,8 +76,10 @@ $ h132 lws create --name your_lws_name
 info    Letter writing set (name=your_lws_name) successfully created!
 ```
 
-- Replace `/path/to/your/repo` with the secret repository checkout path where you want to store your letter writing set.
+- Replace `/path/to/your/repo` with the path to your secret repository where you want to store your letter writing set.
 - Replace `your_lws_name` with a name of your choice for the letter writing set.
+
+**Note:** Setting the `LWS_DIR` environment variable defines the location where `h132` will store its configuration files for the letter writing set.
 
 ### 🔑 Adding Access Keys
 
@@ -86,8 +88,8 @@ info    Letter writing set (name=your_lws_name) successfully created!
 To add an access key managed by TPM 2.0 and protected by a FIDO2 Security Key, use the following command:
 
 ```sh
-$ h132 keys add --type webauthn_wrapped_tpm --name your_key_name --tpmKeyHandle 81008015
-info    Using TPM device: /dev/tpm0
+$ h132 keys add --type webauthn_wrapped_tpm --name your_key_name --tpmKeyHandle 0x81008015
+info    Using TPM device: /dev/tpmrm0
 Please navigate to the following URL in your browser: https://ipa-cyberlab.github.io/h132/webauthn_bridge/#...
 
 info    Successfully registered WebAuthn credential. Now acquiring PRF secret.
@@ -100,10 +102,13 @@ info    Successfully added the key to the letter writing set.
 ```
 
 - Replace `your_key_name` with a name for your access key.
-- The `--tpmKeyHandle` option specifies the TPM handle where the key will be stored. We recommend using `810080xx`.
-    - Please consult Section 2.3.1 of ["Registry of Reserved TPM2.0 Handles and Localities"](https://trustedcomputinggroup.org/wp-content/uploads/RegistryOfReservedTPM2HandlesAndLocalities_v1p1_pub.pdf) for precise ranges.
-    - `h132` will bail out safely if there's a pre-existing key at the specified handle, so feel free to try and error.
-- Specify the path to your TPM device using `H132_TPM_PATH` environment variable. `h132` will use `"/dev/tpmrm0` by [default](https://github.com/IPA-CyberLab/h132/blob/master/tpm2/device.go#L13).
+- The `--tpmKeyHandle` option specifies the TPM handle where the key will be stored. We recommend using a handle in the range `0x81008000` to `0x81008FFF`.
+    - Please consult Section 2.3.1 of the ["Registry of Reserved TPM 2.0 Handles and Localities"](https://trustedcomputinggroup.org/wp-content/uploads/RegistryOfReservedTPM2HandlesAndLocalities_v1p1_pub.pdf) for precise ranges.
+    - `h132` will safely exit if there's a pre-existing key at the specified handle, so feel free to experiment.
+- By [default](https://github.com/IPA-CyberLab/h132/blob/master/tpm2/device.go#L13), `h132` uses the TPM device at `/dev/tpmrm0`. If your TPM device is at a different path, specify it using the `H132_TPM_PATH` environment variable:
+    ```sh
+    $ export H132_TPM_PATH=/dev/tpm0
+    ```
 
 #### Adding an Emergency Access Key
 
@@ -138,33 +143,33 @@ info    Found 2 keys in the letter writing set "your_lws_name"
 To import (encrypt) a sensitive file into your repository, run:
 
 ```sh
-$ h132 envelope seal --key your_key_name path/to/your_secret_file
-info    Using TPM device: /dev/tpm0
+$ h132 envelope seal --key your_key_name /path/to/your_secret_file
+info    Using TPM device: /dev/tpmrm0
 Please navigate to the following URL in your browser: https://ipa-cyberlab.github.io/h132/webauthn_bridge/#...
 
-info    Successfully sealed h132 envelope "path/to/your_secret_file.h132"
-info    Produced an envelope file "path/to/your_secret_file.h132"
+info    Successfully sealed h132 envelope "/path/to/your_secret_file.h132"
+info    Produced an envelope file "/path/to/your_secret_file.h132"
 ```
 
 - Replace `your_key_name` with the name of the access key you added earlier.
-- Replace `path/to/your_secret_file` with the path to the file you want to encrypt.
-- The encrypted file will be saved with a `.h132` extension.
+- Replace `/path/to/your_secret_file` with the path to the file you want to encrypt.
+- The encrypted file will be saved with a `.h132` extension in `LWS_DIR` directory.
 
-### 📤 Decrypting a File
+## 📤 Decrypting a File
 
 To decrypt the file when you need to access its contents, use:
 
 ```sh
-$ h132 envelope unseal --key your_key_name path/to/your_secret_file.h132
-info    Using TPM device: /dev/tpm0
+$ h132 envelope unseal --key your_key_name /path/to/your_secret_file.h132
+info    Using TPM device: /dev/tpmrm0
 Please navigate to the following URL in your browser: https://ipa-cyberlab.github.io/h132/webauthn_bridge/#...
 
-info    Successfully unsealed h132 envelope "path/to/your_secret_file.h132"
-info    Produced a plaintext file "path/to/your_secret_file"
+info    Successfully unsealed h132 envelope "/path/to/your_secret_file.h132"
+info    Produced a plaintext file "/path/to/your_secret_file"
 ```
 
-- Replace `path/to/your_secret_file.h132` with the path to the encrypted file.
-- The decrypted file will be restored without the `.h132` extension.
+- Replace `/path/to/your_secret_file.h132` with the path to the encrypted file.
+- The decrypted file will be restored without the `.h132` extension in `LWS_DIR` directory.
 
 ---
 
