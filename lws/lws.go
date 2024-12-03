@@ -60,8 +60,8 @@ func UpdateLWS(lws *pb.LetterWritingSet, flags UpdateFlags) error {
 	}
 
 	// Check for breaking changes
-	if old.Name != lws.Name {
-		return fmt.Errorf("name of letter writing set cannot be changed")
+	if lws.Name == "" {
+		return fmt.Errorf("name of letter writing set cannot be empty")
 	}
 
 	// Check that key are not removed and their names are unique
@@ -109,6 +109,16 @@ func GetKeyByPublicKey(lws *pb.LetterWritingSet, needle *ecdsa.PublicKey) *pb.Ke
 		if pub.Equal(needle) {
 			return k
 		}
+	}
+	return nil
+}
+
+func SetProperty(lws *pb.LetterWritingSet, propertyName, value string) error {
+	switch propertyName {
+	case "name":
+		lws.Name = value
+	default:
+		return fmt.Errorf("unknown property name: %q", propertyName)
 	}
 	return nil
 }

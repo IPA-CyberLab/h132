@@ -11,5 +11,6 @@ var Command = &cli.Command{
 	Subcommands: []*cli.Command{
 		createCommand,
 		statusCommand,
+		setCommand,
 	},
 }
