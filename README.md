@@ -204,6 +204,32 @@ For development purposes, you can use the `swtpm` TPM emulator:
 
 *Note:* While using a TPM emulator is acceptable for development, it defeats the purpose of the system for production use. Always use a real TPM 2.0 module in production environments.
 
+### View envelope structure
+
+You can use `h132 envelope dump` command to view `.h132` envelope file details:
+
+```sh
+$ h132 envelope dump var/lws2/password.txt.h132
+Envelope:
+  Signature: 304402200364ab382e3302b004f5ae35fd0237989a7a720c5e589dafcae312cb722b46790220612be44ae08e8c4bb85473926809692aa3a59e737320f1d2a5555bc6de367a6c (valid)
+  Letter:
+    len(Ciphertext): 24
+    Nonce: 41f937a06bbf292bb894ea58
+    RecipientKey[0]:
+      RecipientPublicKey: xqcH32ShbyI+Ekr4Bm1K89LiIbUgHXR78cSvQbA5IWs= (emergency)
+      SenderEphemeralPublicKey: bZn1pYXn/7aIHD5vnKbpZ6vvaGGI41FUydrP5NTNNKA=
+      SenderEphemeralPublicKeySign: 304402207dc407c0198cfe34eb10f8faf72363859ecee47ea90cdc8b769872d209dd217e022050ffc07faca8ed53e76c182610afef5999408236cb144b98255ea7ef4baa4d5b (valid)
+      EncryptedSymmetricKey: 7c1fb9abb83a71a18b4f9d658ee2def2d1ecbc1c80c5854e9151b1714f54b549027f327ebd02d3675d23e2e1d7391f98
+      Nonce: 8d6d1a954100ac6d268fb4fc
+    RecipientKey[1]:
+      RecipientPublicKey: W7pd/FqIr8AK3ubizKmjqArN/f4yGLkmjXMxrlU/Ufg= (wallet_sk2)
+      SenderEphemeralPublicKey: O94s7hXBJVuhUFL2dqA9HfSc9GCx+F8JShaUJvZbw/o=
+      SenderEphemeralPublicKeySign: 3044022042773e467936fa08582b7a4ad15da8d87a849cbb79ae4af269bb5208591eb8a602202656bd711be13bc053f536e892d07b48823c31c183a90cf34b905641bb174e4a (valid)
+      EncryptedSymmetricKey: 2092b02d610e6acc646c3e7010bf9ec3e1793f3c92d3b5c788a30c9fb841ad54e16a8a817fefb1138fb65c318c7603d9
+      Nonce: 788f61f82385c9e74109a482
+    SenderPublicKey: W7pd/FqIr8AK3ubizKmjqArN/f4yGLkmjXMxrlU/Ufg= (wallet_sk2)
+```
+
 ## 📄 License
 [Apache License 2.0](./LICENSE)
 
