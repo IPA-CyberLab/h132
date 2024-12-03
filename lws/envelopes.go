@@ -58,7 +58,7 @@ func Unseal(ak envelope.AssymmetricKey, envelopeFileName string, envelopeBs []by
 	if err != nil {
 		return err
 	}
-	s.Infof("Successfully unsealed h132 envelope %q", epath)
+	s.Infof("Successfully unsealed h132 envelope %q", envelopeFileName)
 
 	if err := os.WriteFile(epath, plaintext, 0600); err != nil {
 		return err
