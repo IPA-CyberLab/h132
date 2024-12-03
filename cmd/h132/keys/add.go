@@ -156,7 +156,7 @@ var addCommand = &cli.Command{
 		&cli.StringFlag{
 			Name:  "reflectorUrl",
 			Usage: "URL of the reflector server",
-			Value: "https://h132-fixme.example/",
+			Value: "https://ipa-cyberlab.github.io/h132/webauthn_bridge/",
 		},
 		&cli.StringFlag{
 			Name:  "tpmKeyHandle",
