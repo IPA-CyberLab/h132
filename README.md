@@ -155,7 +155,7 @@ info    Produced an envelope file "/path/to/your_secret_file.h132"
 - Replace `/path/to/your_secret_file` with the path to the file you want to encrypt.
 - The encrypted file will be saved with a `.h132` extension in `LWS_DIR` directory.
 
-## 📤 Decrypting a File
+### 📤 Decrypting a File
 
 To decrypt the file when you need to access its contents, use:
 
