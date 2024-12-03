@@ -1,11 +1,14 @@
 # h132: Experimental Secret Information Management System
 
+[![Build Status][gh-actions-badge]][gh-actions]
+[![go report][go-report-badge]][go-report]
+
 **h132** is an experimental secret information management system written in Go.
 It leverages affordable, tamper-resistant hardware modules such as **TPM 2.0** and **FIDO2 Security Keys** to provide a cost-effective alternative to traditional Hardware Security Modules (HSMs).
 
 The name "h132" is derived from the Japanese word for "secret" (**秘密 - himitsu**) 😉
 
-## Important Notice
+## ⚠⚠⚠️ Important Notice ⚠⚠⚠
 
 This project is highly experimental. Before considering its use, it is *strongly recommended* to explore established tools like [GnuPG](https://gnupg.org/) and [age](https://age-encryption.org/). While these tools do not support the proposed multi-factor encryption scheme, they are arguably much safer than relying on experimental software.
 
@@ -56,3 +59,9 @@ This project is highly experimental. Before considering its use, it is *strongly
 
 ## 📄 License
 [Apache License 2.0](./LICENSE)
+
+<!-- Markdown link & img dfn's -->
+[go-report-badge]: https://goreportcard.com/badge/github.com/IPA-CyberLab/h132
+[go-report]: https://goreportcard.com/report/github.com/IPA-CyberLab/h132
+[gh-actions-badge]: https://github.com/IPA-CyberLab/h132/workflows/go/badge.svg
+[gh-actions]: https://github.com/IPA-CyberLab/h132/actions
