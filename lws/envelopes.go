@@ -88,7 +88,7 @@ func RunEditor(filepath string) {
 	}
 }
 
-func Edit(l *pb.LetterWritingSet, ak envelope.AssymmetricKey, envelopeFilePath string, envelopeBs []byte) error {
+func Edit(l *pb.LetterWritingSet, ak envelope.AssymmetricKey, envelopePath string, envelopeBs []byte, plaintextPath string) error {
 	s := zap.S()
 
 	pubs := GetPublicKeys(l)
@@ -96,7 +96,6 @@ func Edit(l *pb.LetterWritingSet, ak envelope.AssymmetricKey, envelopeFilePath s
 		return ErrNoKeys
 	}
 
-	plaintextPath := GetPlaintextPath(envelopeFilePath)
 	var oldPlaintextBs []byte
 
 	// Check if the plaintext file exists
@@ -113,16 +112,21 @@ func Edit(l *pb.LetterWritingSet, ak envelope.AssymmetricKey, envelopeFilePath s
 		}
 	}
 
-	r := bytes.NewReader(envelopeBs)
-	plaintextBs, _, err := envelope.Unseal(r, ak)
-	if err != nil {
-		return err
+	var plaintextBs []byte
+	if len(envelopeBs) > 0 {
+		var err error
+		r := bytes.NewReader(envelopeBs)
+		plaintextBs, _, err = envelope.Unseal(r, ak)
+		if err != nil {
+			return err
+		}
 	}
+
 	if oldPlaintextBs != nil {
 		if bytes.Equal(plaintextBs, oldPlaintextBs) {
-			s.Infof("Found existing plaintext file %q with the same content as the envelope file %q. Proceeding.", plaintextPath, envelopeFilePath)
+			s.Infof("Found existing plaintext file %q with the same content as the envelope file %q. Proceeding.", plaintextPath, envelopePath)
 		} else {
-			return fmt.Errorf("the existing plaintext work file %q contains different content to the envelope file %q", plaintextPath, envelopeFilePath)
+			return fmt.Errorf("the existing plaintext work file %q contains different content to the envelope file %q", plaintextPath, envelopePath)
 		}
 	}
 	oldPlaintextBs = plaintextBs
@@ -135,7 +139,7 @@ func Edit(l *pb.LetterWritingSet, ak envelope.AssymmetricKey, envelopeFilePath s
 	RunEditor(plaintextPath)
 
 	// Read the new content of the plaintext file
-	plaintextBs, err = os.ReadFile(plaintextPath)
+	plaintextBs, err := os.ReadFile(plaintextPath)
 	if err != nil {
 		return fmt.Errorf("failed to read file %q: %w", plaintextPath, err)
 	}
@@ -159,16 +163,20 @@ func Edit(l *pb.LetterWritingSet, ak envelope.AssymmetricKey, envelopeFilePath s
 	s.Infof("Successfully sealed h132 envelope")
 
 	// Overwrite the envelope file with the new content
-	if err := os.WriteFile(envelopeFilePath, envBuf.Bytes(), 0644); err != nil {
+	if err := os.WriteFile(envelopePath, envBuf.Bytes(), 0644); err != nil {
 		return err
 	}
-	s.Infof("Successfully produced an envelope file %q", envelopeFilePath)
+	s.Infof("Successfully produced an envelope file %q", envelopePath)
 
 	// Remove the plaintext file
 	if err := os.Remove(plaintextPath); err != nil {
 		return fmt.Errorf("failed to remove file %q: %w", plaintextPath, err)
 	}
 	s.Infof("Removed the plaintext file %q", plaintextPath)
+
+	if err := RunPostEditHook(l, envelopePath); err != nil {
+		return err
+	}
 
 	return nil
 }

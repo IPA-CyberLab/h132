@@ -4,6 +4,7 @@ import (
 	"crypto/ecdsa"
 	"fmt"
 	"os"
+	"os/exec"
 
 	"github.com/IPA-CyberLab/h132/pb"
 	"go.uber.org/zap"
@@ -60,8 +61,8 @@ func UpdateLWS(lws *pb.LetterWritingSet, flags UpdateFlags) error {
 	}
 
 	// Check for breaking changes
-	if lws.Name == "" {
-		return fmt.Errorf("name of letter writing set cannot be empty")
+	if lws.Name != old.Name {
+		return fmt.Errorf("LWS name cannot be changed, since they are used as a part of webauthn credential ID")
 	}
 
 	// Check that key are not removed and their names are unique
@@ -113,10 +114,40 @@ func GetKeyByPublicKey(lws *pb.LetterWritingSet, needle *ecdsa.PublicKey) *pb.Ke
 	return nil
 }
 
+func RunPreEditHook(lws *pb.LetterWritingSet, envelopePath string) error {
+	s := zap.S()
+
+	if lws.PreEditHook == "" {
+		s.Debugf("No pre-edit hook is set.")
+		return nil
+	}
+
+	s.Debugf("Running pre-edit hook: %q", lws.PreEditHook)
+	cmd := exec.Command(lws.PreEditHook, envelopePath)
+	cmd.Stderr = os.Stderr
+	cmd.Stdout = os.Stdout
+	return cmd.Run()
+}
+
+func RunPostEditHook(lws *pb.LetterWritingSet, envelopePath string) error {
+	s := zap.S()
+
+	if lws.PostEditHook == "" {
+		s.Debugf("No post-edit hook is set.")
+		return nil
+	}
+
+	s.Debugf("Running post-edit hook: %q", lws.PostEditHook)
+	cmd := exec.Command(lws.PostEditHook, envelopePath)
+	cmd.Stderr = os.Stderr
+	cmd.Stdout = os.Stdout
+	return cmd.Run()
+}
+
 func SetProperty(lws *pb.LetterWritingSet, propertyName, value string) error {
 	switch propertyName {
 	case "name":
-		lws.Name = value
+		return fmt.Errorf("name is a read-only property")
 	case "pre_edit_hook":
 		lws.PreEditHook = value
 	case "post_edit_hook":

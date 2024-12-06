@@ -23,9 +23,9 @@ import (
 var (
 	EncryptSymmetricKeySalt = []byte("encrypt_symmetric_key")
 
-	ErrInvalidEnvelopeSignature     = errors.New("Envelope signature verification failed.")
-	ErrInvalidRecipientKeySignature = errors.New("Recipient key signature verification failed.")
-	ErrNotRecipient                 = errors.New("The private key is not a recipient of the envelope.")
+	ErrInvalidEnvelopeSignature     = errors.New("Envelope signature verification failed")
+	ErrInvalidRecipientKeySignature = errors.New("Recipient key signature verification failed")
+	ErrNotRecipient                 = errors.New("The private key is not a recipient of the envelope. Likely you sealed the envelope before adding the key to the lws")
 )
 
 func deriveSymmetricKeyEncryptionKey(sharedSecret []byte) []byte {

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"os"
 
 	"github.com/urfave/cli/v2"
 	"go.uber.org/zap"
@@ -11,7 +12,8 @@ import (
 	"github.com/IPA-CyberLab/h132/cmd/h132/common"
 	"github.com/IPA-CyberLab/h132/cmd/h132/envelope"
 	"github.com/IPA-CyberLab/h132/cmd/h132/keys"
-	"github.com/IPA-CyberLab/h132/cmd/h132/lws"
+	lwsc "github.com/IPA-CyberLab/h132/cmd/h132/lws"
+	"github.com/IPA-CyberLab/h132/lws"
 	"github.com/IPA-CyberLab/h132/version"
 )
 
@@ -34,7 +36,7 @@ func New() *cli.App {
 	app.Commands = []*cli.Command{
 		envelope.Command,
 		keys.Command,
-		lws.Command,
+		lwsc.Command,
 	}
 	BeforeImpl := func(c *cli.Context) error {
 		var logger *zap.Logger
@@ -57,6 +59,10 @@ func New() *cli.App {
 			}
 		}
 		zap.ReplaceGlobals(logger)
+
+		if err := os.Setenv("H132_LWS_DIR", lws.GetLWSDir()); err != nil {
+			return fmt.Errorf("failed to set H132_LWS_DIR envvar: %w", err)
+		}
 
 		return nil
 	}
