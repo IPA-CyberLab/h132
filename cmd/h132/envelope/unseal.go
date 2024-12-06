@@ -70,6 +70,7 @@ var unsealCommand = &cli.Command{
 		if err != nil {
 			return err
 		}
+		defer ak.Close()
 
 		if err := lws.Unseal(ak, envelopeFileName, bs); err != nil {
 			return fmt.Errorf("failed to unseal file %q: %w", envelopeFileName, err)

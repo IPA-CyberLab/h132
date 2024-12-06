@@ -42,6 +42,7 @@ var testCommand = &cli.Command{
 		if err != nil {
 			return err
 		}
+		defer ak.Close()
 
 		testSha256 := sha256.Sum256([]byte("test"))
 		if _, err := ak.Sign(testSha256[:]); err != nil {

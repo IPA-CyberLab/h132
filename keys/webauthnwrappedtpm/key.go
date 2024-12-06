@@ -105,6 +105,20 @@ func derivePassword(prf, salt []byte, tpmKeyHandle tpm2.TPMHandle) []byte {
 	return tpmPassword
 }
 
+func nopCloser(tpm transport.TPM) transport.TPMCloser {
+	return nopCloserT{tpm}
+}
+
+type nopCloserT struct {
+	transport.TPM
+}
+
+func (nopCloserT) Close() error { return nil }
+
+func (t nopCloserT) Send(input []byte) ([]byte, error) {
+	return t.TPM.Send(input)
+}
+
 func (wk *WebAuthnWrappedTPMKey) Provision(tpm transport.TPM, prf []byte) error {
 	tpmPassword := derivePassword(prf, wk.HkdfSalt, wk.TpmKeyHandle)
 
@@ -112,7 +126,8 @@ func (wk *WebAuthnWrappedTPMKey) Provision(tpm transport.TPM, prf []byte) error 
 		KeyHandle: wk.TpmKeyHandle,
 		Password:  tpmPassword,
 	}
-	bk, err := h132_tpm2.ProvisionBackedP256Key(cfg, tpm)
+
+	bk, err := h132_tpm2.ProvisionBackedP256Key(cfg, nopCloser(tpm))
 	if err != nil {
 		return fmt.Errorf("failed to provision backed key: %w", err)
 	}
@@ -172,7 +187,7 @@ func (wk *WebAuthnWrappedTPMKey) SetImplProto(p *pb.KeyImpl) error {
 	return nil
 }
 
-func (wk *WebAuthnWrappedTPMKey) Unwrap(tpm transport.TPM, prf []byte) (*h132_tpm2.BackedP256Key, error) {
+func (wk *WebAuthnWrappedTPMKey) Unwrap(tpm transport.TPMCloser, prf []byte) (*h132_tpm2.BackedP256Key, error) {
 	tpmPassword := derivePassword(prf, wk.HkdfSalt, wk.TpmKeyHandle)
 	cfg := h132_tpm2.BackedP256KeyConfig{
 		KeyHandle: wk.TpmKeyHandle,

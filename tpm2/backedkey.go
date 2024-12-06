@@ -20,13 +20,13 @@ type BackedP256KeyConfig struct {
 
 type BackedP256Key struct {
 	cfg BackedP256KeyConfig
-	t   transport.TPM
+	t   transport.TPMCloser
 
 	name   tpm2.TPM2BName
 	public *ecdsa.PublicKey
 }
 
-func ProvisionBackedP256Key(cfg BackedP256KeyConfig, t transport.TPM) (*BackedP256Key, error) {
+func ProvisionBackedP256Key(cfg BackedP256KeyConfig, t transport.TPMCloser) (*BackedP256Key, error) {
 	k := &BackedP256Key{
 		cfg: cfg,
 		t:   t,
@@ -106,7 +106,7 @@ func ProvisionBackedP256Key(cfg BackedP256KeyConfig, t transport.TPM) (*BackedP2
 	return k, nil
 }
 
-func LoadBackedP256Key(cfg BackedP256KeyConfig, t transport.TPM) (*BackedP256Key, error) {
+func LoadBackedP256Key(cfg BackedP256KeyConfig, t transport.TPMCloser) (*BackedP256Key, error) {
 	k := &BackedP256Key{
 		cfg: cfg,
 		t:   t,
@@ -280,4 +280,8 @@ func (k *BackedP256Key) smokeTest() error {
 	}
 
 	return nil
+}
+
+func (k *BackedP256Key) Close() error {
+	return k.t.Close()
 }

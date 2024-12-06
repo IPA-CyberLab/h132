@@ -78,6 +78,7 @@ var editCommand = &cli.Command{
 		if err != nil {
 			return err
 		}
+		defer ak.Close()
 
 		if err := lws.Edit(l, ak, envelopePath, envelopeBs, plaintextPath); err != nil {
 			return err

@@ -38,7 +38,11 @@ func AccessKey(lwsName string, k *pb.KeyImpl) (envelope.AssymmetricKey, error) {
 		if err != nil {
 			return nil, fmt.Errorf("failed to get TPM: %w", err)
 		}
-		defer tpm.Close()
+		defer func() {
+			if tpm != nil {
+				tpm.Close()
+			}
+		}()
 
 		wwt := ki.WebauthnWrappedTpm
 
@@ -73,6 +77,8 @@ func AccessKey(lwsName string, k *pb.KeyImpl) (envelope.AssymmetricKey, error) {
 		if err != nil {
 			return nil, err
 		}
+		// `bk` has taken over ownership of tpm. Don't close it here.
+		tpm = nil
 
 		return bk, nil
 

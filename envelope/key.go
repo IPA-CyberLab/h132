@@ -11,6 +11,7 @@ type AssymmetricKey interface {
 	Public() *ecdsa.PublicKey
 	Sign(s256digest []byte) ([]byte, error)
 	ECDH(pub *ecdsa.PublicKey) ([]byte, error)
+	io.Closer
 }
 
 type LocalPrivateKey struct {
@@ -48,4 +49,8 @@ func (k *LocalPrivateKey) ECDH(pub *ecdsa.PublicKey) ([]byte, error) {
 	}
 
 	return privDH.ECDH(pubDH)
+}
+
+func (k *LocalPrivateKey) Close() error {
+	return nil
 }

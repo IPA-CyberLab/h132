@@ -67,6 +67,7 @@ var sealCommand = &cli.Command{
 		if err != nil {
 			return err
 		}
+		defer ak.Close()
 
 		if err := lws.Seal(l, ak, fileName, contents); err != nil {
 			return err
