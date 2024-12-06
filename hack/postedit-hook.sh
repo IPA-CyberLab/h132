@@ -25,7 +25,7 @@ if [[ "$file_path_abs" != "$H132_LWS_DIR"* ]]; then
     exit 1
 fi
 
-git add "${file_path_abs#$git_top_level/}"
+git add "${file_path_abs#$H132_LWS_DIR/}"
 git commit -m "Automated commit by h132 post-edit hook script."
 
 if git push; then
