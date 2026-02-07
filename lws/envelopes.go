@@ -145,7 +145,7 @@ func Edit(l *pb.LetterWritingSet, ak envelope.AssymmetricKey, envelopePath strin
 	}
 
 	if bytes.Equal(plaintextBs, oldPlaintextBs) {
-		s.Infof("No change in the plaintext file %q. Skipping the sealing step.", plaintextPath)
+		s.Infof("No change to the plaintext file %q. Skipping the sealing step.", plaintextPath)
 
 		// Remove the plaintext file
 		if err := os.Remove(plaintextPath); err != nil {
