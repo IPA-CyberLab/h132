@@ -11,7 +11,7 @@ require (
 	github.com/foxboron/swtpm_test v0.0.0-20230726224112-46aaafdf7006
 	github.com/go-jose/go-jose/v4 v4.0.4
 	github.com/go-webauthn/webauthn v0.11.2
-	github.com/google/go-tpm v0.9.1
+	github.com/google/go-tpm v0.9.8
 	github.com/tyler-smith/go-bip39 v1.1.0
 	github.com/urfave/cli/v2 v2.27.5
 	go.uber.org/multierr v1.11.0
