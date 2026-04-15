@@ -1,15 +1,13 @@
 module github.com/IPA-CyberLab/h132
 
-go 1.23
-
-toolchain go1.23.4
+go 1.24.0
 
 require (
 	github.com/charmbracelet/bubbles v0.20.0
 	github.com/charmbracelet/bubbletea v1.2.4
 	github.com/charmbracelet/lipgloss v1.0.0
 	github.com/foxboron/swtpm_test v0.0.0-20230726224112-46aaafdf7006
-	github.com/go-jose/go-jose/v4 v4.0.4
+	github.com/go-jose/go-jose/v4 v4.1.4
 	github.com/go-webauthn/webauthn v0.11.2
 	github.com/google/go-tpm v0.9.1
 	github.com/tyler-smith/go-bip39 v1.1.0
